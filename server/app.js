@@ -10,23 +10,41 @@ const mongoose = require('mongoose')
 const compression = require('compression')
 const helmet = require('helmet')
 
+//graphql
+const graphqlHTTP = require('express-graphql')
+const schema = require('./graphql/bookSchema')
+const cors = require('cors')
+const bluebird = require('bluebird')
+
 const app = express()
 
 //setup mongodb connection
 const mongoDB = 'mongodb+srv://Phung:QYiFOORk8Q8qO09Y@cluster0-qjuj6.azure.mongodb.net/node-graphql?retryWrites=true'
-mongoose.connect(mongoDB, { useNewUrlParser: true })
-let db = mongoose.connection
-db.on('error', () => {console.log('MongoDB connection error:')})
+mongoose.connect(mongoDB, {promiseLibrary: bluebird, useNewUrlParser: true })
+    .then(() => console.log('connect successful'))
+    .catch((err) => console.error(err))
+// mongoose.connect(mongoDB, {useNewUrlParser: true })
+//  let db = mongoose.connection
+//  db.on('error', () => {console.log('MongoDB connection error:')})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
+app.use(helmet())
+app.use(compression())
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use('*',cors())
+app.use('/graphql', cors(), graphqlHTTP({
+  schema: schema,
+  rootValue: global,
+  graphiql: true
+}))
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

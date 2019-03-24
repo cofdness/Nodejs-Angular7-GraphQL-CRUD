@@ -7,6 +7,7 @@ const bookSchema = new Schema({
     author: {type: String, required: true, trim: true},
     description: {type: String, required: true, trim: true},
     published_year: {type: Number, min: 1945, max: 2019, required: true},
+    publisher:{ type: String, required: true, trim: true},
     updated_date: { type: Date, default: Date.now}
 })
 const Book = mongoose.model('Book', bookSchema)
